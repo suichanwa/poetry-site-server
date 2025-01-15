@@ -1,0 +1,77 @@
+[33mcommit c05c47fc1320e784cdd18b4d9dc4a9e43e1baa32[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: suichanwa <augustinnegura746@gmail.com>
+Date:   Tue Jan 14 23:46:52 2025 +0200
+
+    upd
+
+[33mcommit 206a549c714485cff0f974ab66c33dc6c376dca9[m
+Author: suichanwa <augustinnegura746@gmail.com>
+Date:   Tue Jan 14 23:46:28 2025 +0200
+
+    Update tsconfig and add declarations for missing modules
+
+[33mcommit f23c8e2e6c658fcd5bfb88fa2016d2a3048ec4ee[m
+Author: suichanwa <augustinnegura746@gmail.com>
+Date:   Tue Jan 14 23:42:03 2025 +0200
+
+    Update dependencies and specify Node.js version
+
+[33mcommit 724d3d2305570c1f932ff2848e17c127203c596a[m
+Author: suichanwa <augustinnegura746@gmail.com>
+Date:   Tue Jan 14 23:40:19 2025 +0200
+
+    Update index.ts and other changes
+
+[33mcommit 46d38029207ee13bd7944caf33f6f10fba6dba2e[m
+Author: suichanwa <augustinnegura746@gmail.com>
+Date:   Tue Jan 14 00:18:00 2025 +0200
+
+    upd image proceess
+
+[33mcommit d8249860ae2ba5076bf434d0cb885948162fc5e6[m
+Author: suichanwa <augustinnegura746@gmail.com>
+Date:   Tue Jan 14 00:16:35 2025 +0200
+
+    upd cors add
+
+[33mcommit 259ffdbf6876da8272d895f3b32b4f166202dae0[m
+Author: suichanwa <augustinnegura746@gmail.com>
+Date:   Mon Jan 13 14:32:20 2025 +0200
+
+    upd
+
+[33mcommit 1c8d2e664814eb8ff978d10180e02e917f52b2b2[m
+Author: suichanwa <augustinnegura746@gmail.com>
+Date:   Sun Jan 12 16:26:07 2025 +0200
+
+    upd adding bable && makes the building works properly witohut issues
+
+[33mcommit c4221ee851dfd4cfde7167028404d130019c2b90[m
+Author: suichanwa <augustinnegura746@gmail.com>
+Date:   Sun Jan 12 15:34:35 2025 +0200
+
+    server upd
+
+[33mcommit 3237e2869f510c85b01b1285c6280d1c76ca2c27[m
+Author: suichanwa <augustinnegura746@gmail.com>
+Date:   Sat Jan 11 14:07:50 2025 +0200
+
+    upd
+
+[33mcommit 0696daec89dc3a20025f26610057e867b3bb1245[m
+Author: suichanwa <augustinnegura746@gmail.com>
+Date:   Fri Jan 10 04:57:35 2025 +0200
+
+    upd
+
+[33mcommit 5a7910ea0813f761f943d1e4f43cb36b32d8189a[m
+Author: suichanwa <augustinnegura746@gmail.com>
+Date:   Fri Jan 10 04:37:10 2025 +0200
+
+    Update index.ts and other changes
+
+[33mcommit af1aeb79f56fdaa6d31841a8c79efb40135d5f36[m
+Author: suichanwa <augustinnegura746@gmail.com>
+Date:   Fri Jan 10 04:30:26 2025 +0200
+
+    Initial commit

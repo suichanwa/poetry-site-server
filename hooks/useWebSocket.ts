@@ -23,7 +23,7 @@ export function useWebSocket() {
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        const socket = new WebSocket(`ws://localhost:3000?token=${token}`);
+        const socket = new WebSocket(`ws://localhost:3001?token=${token}`);
         
         socket.onopen = () => {
           console.log('WebSocket connected');

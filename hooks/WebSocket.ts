@@ -10,7 +10,7 @@ export function useWebSocket() {
     if (!user) return;
 
     const token = localStorage.getItem('token');
-    const wsUrl = `ws://localhost:3000?token=${token}`;
+    const wsUrl = `ws://localhost:3001?token=${token}`;
     
     ws.current = new WebSocket(wsUrl);
 

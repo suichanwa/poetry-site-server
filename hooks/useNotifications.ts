@@ -22,7 +22,7 @@ export function useNotifications() {
     if (!user) return;
     
     try {
-      const response = await fetch('http://localhost:3000/api/notifications', {
+      const response = await fetch('http://localhost:3001/api/notifications', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -39,7 +39,7 @@ export function useNotifications() {
     fetchNotifications();
     
     // Set up WebSocket connection for real-time updates
-    const ws = new WebSocket(`ws://localhost:3000?token=${localStorage.getItem('token')}`);
+    const ws = new WebSocket(`ws://localhost:3001?token=${localStorage.getItem('token')}`);
     
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -56,7 +56,7 @@ export function useNotifications() {
 
   const markAsRead = async (id: number) => {
     try {
-      await fetch(`http://localhost:3000/api/notifications/${id}/mark-read`, {
+      await fetch(`http://localhost:3001/api/notifications/${id}/mark-read`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -74,7 +74,7 @@ export function useNotifications() {
 
   const markAllAsRead = async () => {
     try {
-      await fetch('http://localhost:3000/api/notifications/mark-all-read', {
+      await fetch('http://localhost:3001/api/notifications/mark-all-read', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
