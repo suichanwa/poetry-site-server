@@ -5,57 +5,44 @@ const prisma = new PrismaClient();
 
 async function main() {
   try {
-    // Clean up existing data
+    // Delete data in correct order (respecting foreign key constraints)
+    await prisma.notification.deleteMany();
+    await prisma.notificationPreferences.deleteMany();
+    await prisma.sale.deleteMany();
+    await prisma.like.deleteMany();
+    await prisma.comment.deleteMany();
+    await prisma.bookmark.deleteMany();
+    await prisma.page.deleteMany();
+    await prisma.chapter.deleteMany();
+    await prisma.lightNovelChapter.deleteMany();
+    await prisma.message.deleteMany();
+    await prisma.chat.deleteMany();
+    await prisma.follow.deleteMany();
+    await prisma.threadComment.deleteMany();
+    await prisma.thread.deleteMany();
+    await prisma.topic.deleteMany();
     await prisma.rule.deleteMany();
+    await prisma.communityPost.deleteMany();
+    await prisma.poem.deleteMany();
+    await prisma.manga.deleteMany();
+    await prisma.lightNovel.deleteMany();
+    await prisma.digitalProduct.deleteMany();
+    await prisma.subscription.deleteMany();
     await prisma.community.deleteMany();
-    // ... existing cleanup
+    await prisma.tag.deleteMany();
+    await prisma.user.deleteMany();
 
+    // Create initial test user
     const user1 = await prisma.user.create({
       data: {
         name: 'Emily Parker',
         email: 'emily@example.com',
         password: await bcrypt.hash('password123', 10),
-      },
-    });
-
-    // Create test communities
-    const poetryCommunity = await prisma.community.create({
-      data: {
-        name: 'Modern Poetry',
-        description: 'A community for modern poetry enthusiasts',
-        creatorId: user1.id,
-        rules: {
-          create: [
-            {
-              title: 'Be Respectful',
-              description: 'Treat all members with respect and kindness'
-            },
-            {
-              title: 'Original Content Only',
-              description: 'Only share poems you have written yourself'
-            }
-          ]
-        },
-        members: {
-          connect: [{ id: user1.id }]
-        },
-        moderators: {
-          connect: [{ id: user1.id }]
-        }
       }
     });
 
-    // Create a test poem in the community
-    await prisma.poem.create({
-      data: {
-        title: 'Community First Poem',
-        content: 'This is our first community poem\nSharing words together',
-        authorId: user1.id,
-        communityId: poetryCommunity.id
-      }
-    });
+    console.log('Database has been reset and seeded');
 
-    console.log('Database seeded with community data');
   } catch (error) {
     console.error('Error seeding database:', error);
     throw error;
