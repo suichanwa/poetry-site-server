@@ -52,6 +52,7 @@ model User {
   sentMessages            Message[]                @relation("sentMessages")
   chats                   Chat[]                   @relation("UserChats")
   lightNovels             LightNovel[]
+  books                   Book[]                   @relation("UserBooks")
 }
 
 model Message {
@@ -440,4 +441,15 @@ model LightNovelChapter {
   lightNovelId Int
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+}
+
+model Book {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  coverImage  String
+  author      User     @relation(fields: [authorId], references: [id], name: "UserBooks") 
+  authorId    Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
