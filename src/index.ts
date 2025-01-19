@@ -1,6 +1,8 @@
 // server/src/index.ts
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet'; 
+import morgan from 'morgan'; 
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
@@ -11,7 +13,7 @@ import authRoutes from '../routes/auth.routes';
 import userRoutes from '../routes/user.routes';
 import poemRoutes from '../routes/poem.routes';
 import followRoutes from '../routes/follow.routes';
-import communityRoutes from '../routes/cummunity.routes';
+import communityRoutes from '../routes/community.routes';
 import notificationRoutes from '../routes/notification.routes';
 import chatRoutes from '../routes/chat.routes';
 import mangaRoutes from '../routes/manga.routes';
@@ -32,7 +34,6 @@ const port = process.env.PORT || 3001;
 // Initialize WebSocket server
 initWebSocket(server);
 
-// Add CSP headers with WebSocket connection allowed
 app.use((req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
@@ -41,22 +42,23 @@ app.use((req, res, next) => {
   next();
 });
 
-// Rest of your middleware and route setup
+// Middleware setup
 app.use(express.json());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
+}));
+app.use(helmet());
+app.use(morgan('combined'));
 
 const uploadsDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(uploadsDir));
 app.use('/api/auth', authRoutes);
 app.use('/api/poems', poemRoutes);
 app.use('/api/users', userRoutes);

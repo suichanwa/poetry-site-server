@@ -41,7 +41,7 @@ const upload = multer({
   }
 });
 
-router.post('/', authMiddleware, async (req: any, res) => {
+router.post('/', authMiddleware, async (req, res) => {
   try {
     const { name, description, isPrivate = false } = req.body;
     const userId = req.user.id;
@@ -82,7 +82,6 @@ router.post('/', authMiddleware, async (req: any, res) => {
     res.status(500).json({ error: 'Failed to create community' });
   }
 });
-
 
 router.get('/', async (req, res) => {
   try {

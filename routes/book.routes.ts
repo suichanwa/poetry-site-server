@@ -1,7 +1,7 @@
 // server/routes/book.routes.ts
 import { Router } from 'express';
-import { authMiddleware } from '../middleware/authMiddleware';
-import { prisma } from '../prismaClient';
+import { PrismaClient } from '@prisma/client';
+import { authMiddleware } from '../middleware/auth.middleware';
 
 const router = Router();
 
