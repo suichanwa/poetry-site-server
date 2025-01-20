@@ -90,14 +90,9 @@ router.post('/:id/avatar', authMiddleware, upload.single('avatar'), async (req: 
   }
 });
 
-router.get('/:id', authMiddleware, async (req: any, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
-    
-    if (isNaN(userId)) {
-      return res.status(400).json({ error: 'Invalid user ID' });
-    }
-
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -105,8 +100,16 @@ router.get('/:id', authMiddleware, async (req: any, res) => {
         name: true,
         email: true,
         avatar: true,
-        banner: true, // Include banner in the response
-        bio: true
+        bio: true,
+        banner: true,
+        createdAt: true,
+        updatedAt: true,
+        _count: {
+          select: {
+            followers: true,
+            following: true,
+          }
+        }
       }
     });
 
@@ -117,7 +120,7 @@ router.get('/:id', authMiddleware, async (req: any, res) => {
     res.json(user);
   } catch (error) {
     console.error('Error fetching user:', error);
-    res.status(500).json({ error: 'Failed to fetch user data' });
+    res.status(500).json({ error: 'Failed to fetch user' });
   }
 });
 
@@ -262,6 +265,144 @@ router.get('/:id/posts', async (req, res) => {
   } catch (error) {
     console.error('Error fetching user posts:', error);
     res.status(500).json({ error: 'Failed to fetch user posts' });
+  }
+});
+
+router.get('/:id/poems', async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const poems = await prisma.poem.findMany({
+      where: { authorId: userId },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true
+          }
+        },
+        tags: true,
+        _count: {
+          select: {
+            comments: true,
+            likes: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    res.json(poems);
+  } catch (error) {
+    console.error('Error fetching user poems:', error);
+    res.status(500).json({ error: 'Failed to fetch user poems' });
+  }
+});
+
+router.get('/:id/manga', async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const manga = await prisma.manga.findMany({
+      where: { authorId: userId },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true
+          }
+        },
+        tags: true,
+        chapters: {
+          select: {
+            id: true,
+            title: true,
+            orderIndex: true,
+            createdAt: true
+          }
+        }
+      }
+    });
+
+    res.json(manga);
+  } catch (error) {
+    console.error('Error fetching user manga:', error);
+    res.status(500).json({ error: 'Failed to fetch user manga' });
+  }
+});
+
+router.get('/:id/lightnovels', async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const lightNovels = await prisma.lightNovel.findMany({
+      where: { authorId: userId },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true
+          }
+        },
+        tags: true,
+        chapters: {
+          select: {
+            id: true,
+            title: true,
+            orderIndex: true,
+            createdAt: true
+          }
+        }
+      }
+    });
+
+    res.json(lightNovels);
+  } catch (error) {
+    console.error('Error fetching user light novels:', error);
+    res.status(500).json({ error: 'Failed to fetch user light novels' });
+  }
+});
+
+// Get user's books
+router.get('/:id/books', async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const books = await prisma.book.findMany({
+      where: { authorId: userId },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true
+          }
+        },
+        comments: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                avatar: true
+              }
+            }
+          }
+        },
+        _count: {
+          select: {
+            comments: true,
+            likes: true
+          }
+        }
+      }
+    });
+
+    res.json(books);
+  } catch (error) {
+    console.error('Error fetching user books:', error);
+    res.status(500).json({ error: 'Failed to fetch user books' });
   }
 });
 
