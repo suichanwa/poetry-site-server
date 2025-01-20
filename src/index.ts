@@ -1,4 +1,3 @@
-// server/src/index.ts
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet'; 
@@ -50,7 +49,9 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 }));
-app.use(helmet());
+app.use(helmet({
+  crossOriginEmbedderPolicy: false, // Disable crossOriginEmbedderPolicy
+}));
 app.use(morgan('combined'));
 
 const uploadsDir = path.join(__dirname, '../uploads');
@@ -58,7 +59,23 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-app.use('/uploads', express.static(uploadsDir));
+// Serve static files from the uploads directory with CORS and CORP headers
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+}, express.static(uploadsDir));
+
+// Route to list contents of the uploads directory
+app.get('/uploads', (req, res) => {
+  fs.readdir(uploadsDir, (err, files) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to read uploads directory' });
+    }
+    res.json(files);
+  });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/poems', poemRoutes);
 app.use('/api/users', userRoutes);

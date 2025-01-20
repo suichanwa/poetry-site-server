@@ -76,7 +76,7 @@ router.post('/',
       const novelData: LightNovelCreateData = {
         title: title.trim(),
         description: description.trim(),
-        coverImage: relativePath, // Store relative path instead of full path
+        coverImage: relativePath, 
         authorId: req.user.id,
         tags: parsedTags
       };
@@ -389,6 +389,39 @@ router.delete('/:id/chapters/:chapterId', authMiddleware, async (req: any, res) 
   } catch (error) {
     console.error('Error deleting chapter:', error);
     res.status(500).json({ error: 'Failed to delete chapter' });
+  }
+});
+
+// Get user's light novels
+router.get('/user/:id', async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const lightNovels = await prisma.lightNovel.findMany({
+      where: { authorId: userId },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true
+          }
+        },
+        tags: true,
+        chapters: {
+          select: {
+            id: true,
+            title: true,
+            orderIndex: true,
+            createdAt: true
+          }
+        }
+      }
+    });
+
+    res.json(lightNovels);
+  } catch (error) {
+    console.error('Error fetching user light novels:', error);
+    res.status(500).json({ error: 'Failed to fetch user light novels' });
   }
 });
 

@@ -232,4 +232,37 @@ router.post('/:id/banner', authMiddleware, uploadBanner.single('banner'), async 
   }
 });
 
+// Get user's posts
+router.get('/:id/posts', async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const posts = await prisma.post.findMany({
+      where: { authorId: userId },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true
+          }
+        },
+        _count: {
+          select: {
+            comments: true,
+            likes: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    res.json(posts);
+  } catch (error) {
+    console.error('Error fetching user posts:', error);
+    res.status(500).json({ error: 'Failed to fetch user posts' });
+  }
+});
+
 export default router;

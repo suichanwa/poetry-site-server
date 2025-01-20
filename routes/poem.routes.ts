@@ -821,11 +821,10 @@ router.delete('/comments/:id/like', authMiddleware, async (req: any, res) => {
   }
 });
 
-// Update poem
-router.put('/:id', authMiddleware, async (req: any, res) => {
+router.put('/:id', authMiddleware, upload.single('poemFile'), async (req, res) => {
   try {
     const poemId = parseInt(req.params.id);
-    const { title, content, tags, formatting } = req.body;
+    const { title, content, tags, formatting } = JSON.parse(req.body.data);
     const userId = req.user.id;
 
     // First check if user owns this poem
@@ -840,22 +839,26 @@ router.put('/:id', authMiddleware, async (req: any, res) => {
       return res.status(403).json({ error: 'Not authorized to edit this poem' });
     }
 
-    // Update poem
+    const poemData: any = {
+      title,
+      content,
+      formatting: formatting ? JSON.stringify(formatting) : null, // Convert to string for JSON field
+      tags: {
+        set: [], // Clear existing tags
+        connectOrCreate: tags.map((tag: string) => ({
+          where: { name: tag },
+          create: { name: tag }
+        }))
+      }
+    };
+
+    if (req.file) {
+      poemData.file = `/uploads/poems/${req.file.filename}`;
+    }
+
     const updatedPoem = await prisma.poem.update({
       where: { id: poemId },
-      data: {
-        title,
-        content,
-        formatting: formatting ? JSON.stringify(formatting) : null,
-        // Remove all existing tags and add new ones
-        tags: {
-          set: [], // Clear existing tags
-          connectOrCreate: tags.map((tag: string) => ({
-            where: { name: tag },
-            create: { name: tag }
-          }))
-        }
-      },
+      data: poemData,
       include: {
         author: {
           select: {
@@ -885,6 +888,34 @@ router.put('/:id', authMiddleware, async (req: any, res) => {
   } catch (error) {
     console.error('Error updating poem:', error);
     res.status(500).json({ error: 'Failed to update poem' });
+  }
+});
+
+router.delete('/:id', authMiddleware, async (req, res) => {
+  try {
+    const poemId = parseInt(req.params.id);
+    const userId = req.user.id;
+
+    // First check if user owns this poem
+    const poem = await prisma.poem.findFirst({
+      where: {
+        id: poemId,
+        authorId: userId
+      }
+    });
+
+    if (!poem) {
+      return res.status(403).json({ error: 'Not authorized to delete this poem' });
+    }
+
+    await prisma.poem.delete({
+      where: { id: poemId }
+    });
+
+    res.json({ message: 'Poem deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting poem:', error);
+    res.status(500).json({ error: 'Failed to delete poem' });
   }
 });
 

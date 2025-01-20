@@ -533,4 +533,37 @@ router.get('/recommended', async (req, res) => {
   }
 });
 
+// Get user's manga
+router.get('/user/:id', async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const manga = await prisma.manga.findMany({
+      where: { authorId: userId },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true
+          }
+        },
+        tags: true,
+        chapters: {
+          select: {
+            id: true,
+            title: true,
+            orderIndex: true,
+            createdAt: true
+          }
+        }
+      }
+    });
+
+    res.json(manga);
+  } catch (error) {
+    console.error('Error fetching user manga:', error);
+    res.status(500).json({ error: 'Failed to fetch user manga' });
+  }
+});
+
 export default router;
