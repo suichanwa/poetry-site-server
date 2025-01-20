@@ -17,7 +17,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Get all books
 router.get('/', async (req, res) => {
   try {
     const books = await prisma.book.findMany({
@@ -353,20 +352,20 @@ router.get('/user/:userId', async (req, res) => {
 });
 
 // Create a new book
-router.post('/', authMiddleware, upload.single('coverImage'), async (req, res) => {
+router.post('/', authMiddleware, upload.fields([{ name: 'coverImage' }, { name: 'pdfFile' }]), async (req, res) => {
   try {
     const { title, description, content } = req.body;
     const userId = req.user.id;
-    const coverImage = req.file ? `/uploads/books/${req.file.filename}` : null;
-
-    console.log('Creating book with data:', { title, description, content, coverImage, userId }); // Add logging
+    const coverImage = req.files['coverImage'] ? `/uploads/books/${req.files['coverImage'][0].filename}` : null;
+    const pdfUrl = req.files['pdfFile'] ? `/uploads/books/${req.files['pdfFile'][0].filename}` : null;
 
     const book = await prisma.book.create({
       data: {
         title,
         description,
-        content, // Ensure content is included
+        content,
         coverImage,
+        pdfUrl,
         authorId: userId
       },
       include: {
@@ -384,6 +383,32 @@ router.post('/', authMiddleware, upload.single('coverImage'), async (req, res) =
   } catch (error) {
     console.error('Error creating book:', error);
     res.status(500).json({ error: 'Failed to create book' });
+  }
+});
+
+// Get like status for a book
+router.get('/:id/like/status', authMiddleware, async (req, res) => {
+  try {
+    const bookId = parseInt(req.params.id);
+    const userId = req.user.id;
+
+    const like = await prisma.bookLike.findUnique({
+      where: {
+        bookId_userId: {
+          bookId,
+          userId
+        }
+      }
+    });
+
+    const likeCount = await prisma.bookLike.count({
+      where: { bookId }
+    });
+
+    res.json({ liked: !!like, likeCount });
+  } catch (error) {
+    console.error('Error fetching like status:', error);
+    res.status(500).json({ error: 'Failed to fetch like status' });
   }
 });
 

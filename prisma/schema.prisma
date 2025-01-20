@@ -35,8 +35,8 @@ model User {
   sentNotifications       Notification[]           @relation("SentNotifications")
   notificationPreferences NotificationPreferences?
   communityPosts          CommunityPost[]
-  digitalProducts         DigitalProduct[] // Add this for DigitalProduct relation
-  purchases               Sale[] // Add this for Sale relation
+  digitalProducts         DigitalProduct[]         // Add this for DigitalProduct relation
+  purchases               Sale[]                   // Add this for Sale relation
   avatarStyle             String?
   avatarAnimation         String?
   isAnimatedAvatar        Boolean                  @default(false)
@@ -447,16 +447,17 @@ model LightNovelChapter {
 }
 
 model Book {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   title       String
   description String
-  coverImage  String
-  content     String   @db.Text
-  author      User     @relation(fields: [authorId], references: [id], name: "UserBooks") 
+  content     String
+  coverImage  String?
+  pdfUrl      String?
   authorId    Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  views       Int      @default(0)
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade, name: "UserBooks")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  views       Int       @default(0)
   comments    BookComment[]
   bookLikes   BookLike[]
 }
