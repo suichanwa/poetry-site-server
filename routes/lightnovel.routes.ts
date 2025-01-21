@@ -425,4 +425,51 @@ router.get('/user/:id', async (req, res) => {
   }
 });
 
+router.post('/:novelId/chapters/:chapterId/bookmark', authMiddleware, async (req: any, res) => {
+  try {
+    const { novelId, chapterId } = req.params;
+    const userId = req.user.id;
+
+    // Check if the chapter exists
+    const chapter = await prisma.lightNovelChapter.findUnique({
+      where: { id: parseInt(chapterId) }
+    });
+
+    if (!chapter) {
+      return res.status(404).json({ error: 'Chapter not found' });
+    }
+
+    // Check if the bookmark already exists
+    const existingBookmark = await prisma.bookmark.findFirst({
+      where: {
+        userId,
+        chapterId: parseInt(chapterId)
+      }
+    });
+
+    if (existingBookmark) {
+      // Remove the bookmark if it already exists
+      await prisma.bookmark.delete({
+        where: {
+          id: existingBookmark.id
+        }
+      });
+      return res.json({ bookmarked: false });
+    }
+
+    // Create a new bookmark
+    await prisma.bookmark.create({
+      data: {
+        userId,
+        chapterId: parseInt(chapterId)
+      }
+    });
+
+    res.json({ bookmarked: true });
+  } catch (error) {
+    console.error('Error bookmarking chapter:', error);
+    res.status(500).json({ error: 'Failed to bookmark chapter' });
+  }
+});
+
 export default router;

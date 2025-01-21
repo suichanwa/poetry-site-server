@@ -457,4 +457,43 @@ router.get('/following/poems', authMiddleware, async (req, res) => {
   }
 });
 
+router.get('/:id/bookmarks', authMiddleware, async (req: any, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+
+    // Check if userId is valid
+    if (!userId || isNaN(userId)) {
+      return res.status(400).json({ error: 'Invalid user ID' });
+    }
+
+    // Verify if the user is requesting their own bookmarks
+    if (userId !== req.user.id) {
+      return res.status(403).json({ error: 'Not authorized to view these bookmarks' });
+    }
+
+    const bookmarks = await prisma.bookmark.findMany({
+      where: {
+        userId: userId
+      },
+      include: {
+        chapter: {
+          include: {
+            lightNovel: {
+              select: {
+                id: true,
+                title: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    res.json(bookmarks);
+  } catch (error) {
+    console.error('Error fetching bookmarks:', error);
+    res.status(500).json({ error: 'Failed to fetch bookmarks' });
+  }
+});
+
 export default router;
