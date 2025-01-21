@@ -268,11 +268,15 @@ router.get('/:id/posts', async (req, res) => {
   }
 });
 
+// server/routes/user.routes.ts
+
 router.get('/:id/poems', async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
     const poems = await prisma.poem.findMany({
-      where: { authorId: userId },
+      where: {
+        authorId: userId  // Simply use the userId directly here
+      },
       include: {
         author: {
           select: {
@@ -403,6 +407,53 @@ router.get('/:id/books', async (req, res) => {
   } catch (error) {
     console.error('Error fetching user books:', error);
     res.status(500).json({ error: 'Failed to fetch user books' });
+  }
+});
+
+router.get('/following/poems', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Get the list of users that the current user follows
+    const following = await prisma.follow.findMany({
+      where: { followerId: userId },
+      select: { followingId: true }
+    });
+
+    const followingIds = following.map(f => f.followingId);
+
+    // Fetch poems from the followed users
+    const poems = await prisma.poem.findMany({
+      where: {
+        authorId: {
+          in: followingIds
+        }
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true
+          }
+        },
+        tags: true,
+        _count: {
+          select: {
+            likes: true,
+            comments: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    res.json(poems);
+  } catch (error) {
+    console.error('Error fetching poems from followed users:', error);
+    res.status(500).json({ error: 'Failed to fetch poems from followed users' });
   }
 });
 

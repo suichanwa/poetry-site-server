@@ -726,14 +726,11 @@ router.get('/popular', async (_req, res) => {
   }
 });
 
-// server/routes/poem.routes.ts
-// Add this route to fetch poems from followed users
-// Add this route to fetch poems from followed users
-router.get('/following', authMiddleware, async (req: any, res) => {
+router.get('/following', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
-    
-    // First get all users that the current user follows
+
+    // Get the list of users that the current user follows
     const following = await prisma.follow.findMany({
       where: { followerId: userId },
       select: { followingId: true }
@@ -741,7 +738,7 @@ router.get('/following', authMiddleware, async (req: any, res) => {
 
     const followingIds = following.map(f => f.followingId);
 
-    // Then get poems from those users
+    // Fetch poems from the followed users
     const poems = await prisma.poem.findMany({
       where: {
         authorId: {
@@ -771,10 +768,11 @@ router.get('/following', authMiddleware, async (req: any, res) => {
 
     res.json(poems);
   } catch (error) {
-    console.error('Error fetching following poems:', error);
+    console.error('Error fetching poems from followed users:', error);
     res.status(500).json({ error: 'Failed to fetch poems from followed users' });
   }
 });
+
 
 // Toggle comment like
 router.delete('/comments/:id/like', authMiddleware, async (req: any, res) => {
