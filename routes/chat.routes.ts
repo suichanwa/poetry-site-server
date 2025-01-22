@@ -7,86 +7,86 @@ const router = express.Router();
 const prisma = new PrismaClient();
 
 router.post('/', authMiddleware, async (req: any, res) => {
-  try {
-    const { participantId } = req.body;
-    const userId = req.user.id;
+    try {
+        const { participantId } = req.body;
+        const userId = req.user.id;
 
-    // Input validation
-    if (!participantId || typeof participantId !== 'number') {
-      return res.status(400).json({ 
-        message: "Invalid participant ID" 
-      });
-    }
-
-    if (userId === participantId) {
-      return res.status(400).json({ 
-        message: "Cannot create chat with yourself" 
-      });
-    }
-
-    // Check if participant exists
-    const participant = await prisma.user.findUnique({
-      where: { id: participantId }
-    });
-
-    if (!participant) {
-      return res.status(404).json({
-        message: "Participant not found"
-      });
-    }
-
-    // Check if chat already exists
-    const existingChat = await prisma.chat.findFirst({
-      where: {
-        AND: [
-          { participants: { some: { id: userId } } },
-          { participants: { some: { id: participantId } } }
-        ]
-      },
-      include: {
-        participants: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true
-          }
+        // Input validation
+        if (!participantId || typeof participantId !== 'number') {
+        return res.status(400).json({
+            message: "Invalid participant ID",
+        });
         }
-      }
-    });
 
-    if (existingChat) {
-      return res.json(existingChat);
+        if (userId === participantId) {
+        return res.status(400).json({
+            message: "Cannot create chat with yourself",
+        });
+        }
+
+        // Check if participant exists
+        const participant = await prisma.user.findUnique({
+        where: { id: participantId },
+        });
+
+        if (!participant) {
+        return res.status(404).json({
+            message: "Participant not found",
+        });
+        }
+
+        // Check if chat already exists
+        const existingChat = await prisma.chat.findFirst({
+        where: {
+            AND: [
+            { participants: { some: { id: userId } } },
+            { participants: { some: { id: participantId } } },
+            ],
+        },
+        include: {
+            participants: {
+            select: {
+                id: true,
+                name: true,
+                avatar: true,
+            },
+            },
+        },
+        });
+
+        if (existingChat) {
+        return res.json(existingChat);
+        }
+
+        // Create new chat
+        const chat = await prisma.chat.create({
+        data: {
+            participants: {
+            connect: [
+                { id: userId },
+                { id: participantId },
+            ],
+            },
+        },
+        include: {
+            participants: {
+            select: {
+                id: true,
+                name: true,
+                avatar: true,
+            },
+            },
+        },
+        });
+
+        res.json(chat);
+    } catch (error) {
+        console.error('Error creating chat:', error);
+        res.status(500).json({
+        message: 'Failed to create chat',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        });
     }
-
-    // Create new chat
-    const chat = await prisma.chat.create({
-      data: {
-        participants: {
-          connect: [
-            { id: userId },
-            { id: participantId }
-          ]
-        }
-      },
-      include: {
-        participants: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true
-          }
-        }
-      }
-    });
-
-    res.json(chat);
-  } catch (error) {
-    console.error('Error creating chat:', error);
-    res.status(500).json({ 
-      message: 'Failed to create chat',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    });
-  }
 });
 
 // Get user's chats
@@ -124,43 +124,6 @@ router.get('/', authMiddleware, async (req: any, res) => {
   }
 });
 
-// Get single chat
-router.get('/:id', authMiddleware, async (req: any, res) => {
-  try {
-    const chatId = parseInt(req.params.id);
-    const userId = req.user.id;
-
-    const chat = await prisma.chat.findFirst({
-      where: {
-        id: chatId,
-        participants: {
-          some: {
-            id: userId
-          }
-        }
-      },
-      include: {
-        participants: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true
-          }
-        },
-        lastMessage: true
-      }
-    });
-
-    if (!chat) {
-      return res.status(404).json({ error: 'Chat not found' });
-    }
-
-    res.json(chat);
-  } catch (error) {
-    console.error('Error fetching chat:', error);
-    res.status(500).json({ error: 'Failed to fetch chat' });
-  }
-});
 
 // Get chat messages
 router.get('/:id/messages', authMiddleware, async (req: any, res) => {

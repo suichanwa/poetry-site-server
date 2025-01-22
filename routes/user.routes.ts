@@ -496,4 +496,148 @@ router.get('/:id/bookmarks', authMiddleware, async (req: any, res) => {
   }
 });
 
+// server/routes/user.routes.ts
+
+// ... other imports
+
+// Get follow stats for a user (including isFollowing status)
+router.get('/:id/follow-stats', authMiddleware, async (req: any, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const followerId = req.user.id; // The current user
+
+    const followersCount = await prisma.follow.count({
+      where: { followingId: userId }
+    });
+
+    const followingCount = await prisma.follow.count({
+      where: { followerId: userId }
+    });
+
+    const isFollowing = await prisma.follow.count({
+      where: { followerId, followingId: userId }
+    }) > 0;
+
+    res.json({ followersCount, followingCount, isFollowing });
+  } catch (error) {
+    console.error('Error fetching follow stats:', error);
+    res.status(500).json({ error: 'Failed to fetch follow stats' });
+  }
+});
+
+// Get only follower and following counts for a user
+router.get('/:id/follow-counts', async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+
+    const followersCount = await prisma.follow.count({
+      where: { followingId: userId }
+    });
+
+    const followingCount = await prisma.follow.count({
+      where: { followerId: userId }
+    });
+
+    res.json({ followersCount, followingCount });
+  } catch (error) {
+    console.error('Error fetching follow counts:', error);
+    res.status(500).json({ error: 'Failed to fetch follow counts' });
+  }
+});
+
+// server/routes/user.routes.ts
+// ... other imports
+
+router.post('/:id/follow', authMiddleware, async (req: any, res) => {
+  try {
+    const userId = parseInt(req.params.id); // User to follow
+    const followerId = req.user.id; // Current user (follower)
+
+    // Prevent users from following themselves
+    if (userId === followerId) {
+        return res.status(400).json({ error: "You cannot follow yourself" });
+    }
+
+    // Check if the user to follow exists
+    const userToFollow = await prisma.user.findUnique({
+        where: { id: userId },
+    });
+
+    if (!userToFollow) {
+        return res.status(404).json({ error: "User to follow not found" });
+    }
+
+    // Check if the follow relationship already exists
+    const existingFollow = await prisma.follow.findFirst({
+        where: {
+            followerId: followerId,
+            followingId: userId,
+        },
+    });
+
+    if (existingFollow) {
+        // If the relationship exists, unfollow the user
+        await prisma.follow.delete({
+            where: {
+            id: existingFollow.id,
+            },
+        });
+
+        // Decrement followers and following counts
+        await prisma.user.update({
+            where: { id: userId },
+            data: {
+                followers: {
+                    decrement: 1,
+                },
+            },
+        });
+
+        await prisma.user.update({
+            where: { id: followerId },
+            data: {
+                following: {
+                    decrement: 1,
+                },
+            },
+        });
+
+        return res.json({ message: "User unfollowed successfully" });
+    }
+
+    // Create the follow relationship
+    await prisma.follow.create({
+      data: {
+        followerId: followerId,
+        followingId: userId,
+      },
+    });
+
+    // Increment followers and following counts
+    await prisma.user.update({
+        where: { id: userId },
+        data: {
+            followers: {
+            increment: 1,
+            },
+        },
+    });
+
+    await prisma.user.update({
+        where: { id: followerId },
+        data: {
+            following: {
+            increment: 1,
+            },
+        },
+    });
+
+    res.status(201).json({ message: 'User followed successfully' });
+  } catch (error) {
+    console.error('Error following/unfollowing user:', error);
+    res.status(500).json({ error: 'Failed to follow/unfollow user' });
+  }
+});
+
+
 export default router;

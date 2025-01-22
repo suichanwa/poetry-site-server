@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
-import helmet from 'helmet'; 
-import morgan from 'morgan'; 
+import helmet from 'helmet';
+import morgan from 'morgan';
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
@@ -21,7 +21,7 @@ import bookRoutes from '../routes/book.routes';
 
 dotenv.config();
 
-// Add these lines to define __dirname equivalent
+// Define __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -32,6 +32,7 @@ const port = process.env.PORT || 3001;
 // Initialize WebSocket server
 initWebSocket(server);
 
+// Content Security Policy Middleware
 app.use((req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
@@ -42,28 +43,37 @@ app.use((req, res, next) => {
 
 // Middleware setup
 app.use(express.json());
-app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
-}));
-app.use(helmet({
-  crossOriginEmbedderPolicy: false, // Disable crossOriginEmbedderPolicy
-}));
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  })
+);
+app.use(
+  helmet({
+    crossOriginEmbedderPolicy: false, // Disable crossOriginEmbedderPolicy
+  })
+);
 app.use(morgan('combined'));
 
+// Create uploads directory if it doesn't exist
 const uploadsDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
 // Serve static files from the uploads directory with CORS and CORP headers
-app.use('/uploads', (req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
-  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-  next();
-}, express.static(uploadsDir));
+app.use(
+  '/uploads',
+  (req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    next();
+  },
+  express.static(uploadsDir)
+);
 
 // Route to list contents of the uploads directory
 app.get('/uploads', (req, res) => {
@@ -75,6 +85,7 @@ app.get('/uploads', (req, res) => {
   });
 });
 
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/poems', poemRoutes);
 app.use('/api/users', userRoutes);
@@ -86,6 +97,7 @@ app.use('/api/manga', mangaRoutes);
 app.use('/api/lightnovels', lightNovelRoutes);
 app.use('/api/books', bookRoutes);
 
+// Start the server
 server.listen(port, () => {
   console.log(`Server running at http://localhost:3001`);
 });
