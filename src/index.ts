@@ -18,6 +18,7 @@ import chatRoutes from '../routes/chat.routes';
 import mangaRoutes from '../routes/manga.routes';
 import lightNovelRoutes from '../routes/lightNovel.routes';
 import bookRoutes from '../routes/book.routes';
+import ratingRoutes from '../routes/rating.routes';
 
 dotenv.config();
 
@@ -96,6 +97,7 @@ app.use('/api/chats', chatRoutes);
 app.use('/api/manga', mangaRoutes);
 app.use('/api/lightnovels', lightNovelRoutes);
 app.use('/api/books', bookRoutes);
+app.use('/api/rating', ratingRoutes);
 
 // Start the server
 server.listen(port, () => {

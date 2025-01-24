@@ -56,6 +56,7 @@ model User {
   bookComments            BookComment[]
   bookCommentLikes        BookCommentLike[]
   bookLikes               BookLike[]
+  mangaRatings MangaRating[] // Add this line
 }
 
 model Message {
@@ -382,6 +383,7 @@ model Manga {
   updatedAt      DateTime  @updatedAt
   views          Int       @default(0)
   likes          Int       @default(0)
+  ratings   MangaRating[] // Add this line
 }
 
 model Page {
@@ -497,4 +499,18 @@ model BookLike {
   createdAt DateTime @default(now())
 
   @@unique([bookId, userId])
+}
+
+model MangaRating {
+  id        Int      @id @default(autoincrement())
+  rating    Int      // 1-5 stars
+  manga     Manga    @relation(fields: [mangaId], references: [id])
+  mangaId   Int
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  comment   String?  // Optional rating comment
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([mangaId, userId]) // One rating per manga per user
 }

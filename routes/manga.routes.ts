@@ -613,4 +613,58 @@ router.post('/:mangaId/chapters/:chapterId/bookmark', authMiddleware, async (req
   }
 });
 
+router.get('/recommended', async (req, res) => {
+  try {
+    const excludeId = req.query.excludeId ? parseInt(req.query.excludeId as string) : undefined;
+
+    const recommendedMangas = await prisma.manga.findMany({
+      take: 4, // Limit to 4 recommendations
+      where: {
+        ...(excludeId && {
+          NOT: {
+            id: excludeId
+          }
+        })
+      },
+      orderBy: [
+        { views: 'desc' }, // Most viewed first
+        { likes: 'desc' }, // Most liked second
+        { createdAt: 'desc' } // Most recent third
+      ],
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true
+          }
+        },
+        tags: true,
+        chapters: {
+          select: {
+            id: true,
+            title: true,
+            orderIndex: true,
+            createdAt: true
+          },
+          orderBy: {
+            orderIndex: 'asc'
+          }
+        },
+        _count: {
+          select: {
+            likes: true,
+            views: true
+          }
+        }
+      }
+    });
+
+    res.json(recommendedMangas);
+  } catch (error) {
+    console.error('Error fetching recommended mangas:', error);
+    res.status(500).json({ error: 'Failed to fetch recommended mangas' });
+  }
+});
+
 export default router;
