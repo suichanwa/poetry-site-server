@@ -19,6 +19,7 @@ import mangaRoutes from '../routes/manga.routes';
 import lightNovelRoutes from '../routes/lightNovel.routes';
 import bookRoutes from '../routes/book.routes';
 import ratingRoutes from '../routes/rating.routes';
+import lightNovelRatingRoutes from '../routes/lightNovelRating.routes';
 
 dotenv.config();
 
@@ -98,6 +99,7 @@ app.use('/api/manga', mangaRoutes);
 app.use('/api/lightnovels', lightNovelRoutes);
 app.use('/api/books', bookRoutes);
 app.use('/api/rating', ratingRoutes);
+app.use('/api/rating', lightNovelRatingRoutes);
 
 // Start the server
 server.listen(port, () => {

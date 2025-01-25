@@ -57,6 +57,7 @@ model User {
   bookCommentLikes        BookCommentLike[]
   bookLikes               BookLike[]
   mangaRatings MangaRating[] // Add this line
+  lightNovelRatings       LightNovelRating[]       // Add this line
 }
 
 model Message {
@@ -437,6 +438,7 @@ model LightNovel {
   views       Int                 @default(0)
   likes       Int                 @default(0)
   status      String              @default("ONGOING")
+  ratings     LightNovelRating[]  // Add this line
 }
 
 model LightNovelChapter {
@@ -513,4 +515,18 @@ model MangaRating {
   updatedAt DateTime @updatedAt
 
   @@unique([mangaId, userId]) // One rating per manga per user
+}
+
+model LightNovelRating {
+  id        Int      @id @default(autoincrement())
+  rating    Int      // 1-5 stars
+  lightNovel LightNovel @relation(fields: [lightNovelId], references: [id])
+  lightNovelId Int
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  comment   String?  // Optional rating comment
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([lightNovelId, userId]) // One rating per light novel per user
 }
