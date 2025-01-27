@@ -58,6 +58,7 @@ model User {
   bookLikes               BookLike[]
   mangaRatings MangaRating[] // Add this line
   lightNovelRatings       LightNovelRating[]       // Add this line
+  reactions  Reaction[]
 }
 
 model Message {
@@ -70,7 +71,10 @@ model Message {
   createdAt      DateTime @default(now())
   chatId         Int
   chat           Chat     @relation("ChatMessages", fields: [chatId], references: [id])
-  lastMessageFor Chat?    @relation("LastMessage")
+  fileUrl        String?  // Add this line to store the file URL
+  fileName       String?  // Add this line to store the file name
+  lastMessageOf  Chat?    @relation("LastMessage") // Add this line for the opposite relation
+  reactions  Reaction[]
 }
 
 model Chat {
@@ -529,4 +533,14 @@ model LightNovelRating {
   updatedAt DateTime @updatedAt
 
   @@unique([lightNovelId, userId]) // One rating per light novel per user
+}
+
+model Reaction {
+  id        Int      @id @default(autoincrement())
+  messageId Int
+  userId    Int
+  reaction  String
+  message   Message  @relation(fields: [messageId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
 }
